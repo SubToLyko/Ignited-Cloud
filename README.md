@@ -1,4 +1,3 @@
-# Ignited-Cloud
 # 🔥 Ignited Cloud
 
 **Free Minecraft Server Hosting — No Limits, Just Play.**
