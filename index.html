@@ -3,35 +3,47 @@
 <head>
     <title>Ignited Cloud - Free Minecraft Hosting</title>
     <style>
-        body {
-            background: #0a0a0a;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding-top: 80px;
-        }
-        h1 {
-            font-size: 48px;
-            color: #ff6600;
-        }
-        .btn {
-            background: #ff6600;
-            color: white;
-            padding: 15px 40px;
-            text-decoration: none;
-            font-size: 22px;
-            border-radius: 8px;
-            display: inline-block;
-            margin-top: 30px;
-        }
-        .btn:hover {
-            background: #cc5200;
-        }
+        body { background: #0a0a0a; color: white; font-family: Arial; text-align: center; padding-top: 60px; }
+        h1 { font-size: 48px; color: #ff6600; }
+        .box { background: #1a1a1a; padding: 30px; margin: 30px auto; max-width: 400px; border-radius: 10px; }
+        input { padding: 10px; width: 80%; margin: 10px 0; border-radius: 5px; border: none; }
+        .btn { background: #ff6600; color: white; padding: 12px 30px; border: none; font-size: 18px; border-radius: 8px; cursor: pointer; }
+        .btn:hover { background: #cc5200; }
+        #result { margin-top: 20px; padding: 15px; background: #222; border-radius: 5px; }
     </style>
 </head>
 <body>
     <h1>🔥 Ignited Cloud</h1>
     <p>Free Minecraft Server Hosting — No Limits, No Fees.</p>
-    <a class="btn" href="https://subtolyko.github.io/Ignited-Cloud/">Get Your Free Server</a>
+
+    <div class="box">
+        <h3>Create Your Server</h3>
+        <input type="text" id="serverName" placeholder="Server Name">
+        <br>
+        <button class="btn" onclick="createServer()">Create Server</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function createServer() {
+            const name = document.getElementById("serverName").value;
+            const result = document.getElementById("result");
+            result.innerHTML = "⏳ Creating your server...";
+
+            // This calls YOUR backend (server.js)
+            // For GitHub Pages, you'd need a proxy service — more on this below
+            try {
+                const response = await fetch("YOUR_BACKEND_URL/create", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: name, user: 1 })
+                });
+                const data = await response.json();
+                result.innerHTML = `✅ Server Ready!<br>IP: ${data.ip}:${data.port}`;
+            } catch (err) {
+                result.innerHTML = "❌ Error creating server. Try again.";
+            }
+        }
+    </script>
 </body>
 </html>
