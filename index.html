@@ -1,49 +1,482 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Ignited Cloud - Free Minecraft Hosting</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ignited Cloud — Free Minecraft Hosting</title>
     <style>
-        body { background: #0a0a0a; color: white; font-family: Arial; text-align: center; padding-top: 60px; }
-        h1 { font-size: 48px; color: #ff6600; }
-        .box { background: #1a1a1a; padding: 30px; margin: 30px auto; max-width: 400px; border-radius: 10px; }
-        input { padding: 10px; width: 80%; margin: 10px 0; border-radius: 5px; border: none; }
-        .btn { background: #ff6600; color: white; padding: 12px 30px; border: none; font-size: 18px; border-radius: 8px; cursor: pointer; }
-        .btn:hover { background: #cc5200; }
-        #result { margin-top: 20px; padding: 15px; background: #222; border-radius: 5px; }
+        :root {
+            --bg: #0a0a0a;
+            --panel: #141414;
+            --border: #222;
+            --orange: #ff6600;
+            --text: #ccc;
+            --accent: #ff8533;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .navbar {
+            width: 100%;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .navbar .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--orange);
+        }
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            margin-left: 24px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .nav-links a:hover { color: var(--orange); }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 30px 20px;
+        }
+        .hidden { display: none !important; }
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+        .card h2 {
+            color: #fff;
+            margin-bottom: 18px;
+            font-size: 20px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 16px;
+            background: #1e1e1e;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+        }
+        .btn {
+            background: var(--orange);
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-block;
+            text-decoration: none;
+        }
+        .btn:hover { background: #e55d00; }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--orange);
+            color: var(--orange);
+        }
+        .btn-outline:hover { background: var(--orange); color: #fff; }
+        .btn-block { width: 100%; }
+        .flex-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .flex-row > * { flex: 1; min-width: 200px; }
+        .plan-card {
+            background: #1a1a1a;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .plan-card:hover, .plan-card.selected {
+            border-color: var(--orange);
+        }
+        .plan-card h3 {
+            font-size: 28px;
+            color: #fff;
+            margin: 10px 0;
+        }
+        .plan-card .price {
+            font-size: 20px;
+            color: var(--orange);
+            font-weight: 700;
+        }
+        .plan-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 16px 0;
+            font-size: 13px;
+            color: #aaa;
+        }
+        .plan-card ul li { padding: 4px 0; }
+        .chat-box {
+            background: #0d0d0d;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            height: 350px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            font-size: 13px;
+        }
+        .chat-messages .msg {
+            margin-bottom: 12px;
+            padding: 10px 14px;
+            border-radius: 18px;
+            max-width: 75%;
+            word-wrap: break-word;
+        }
+        .msg.user {
+            background: var(--orange);
+            color: #fff;
+            margin-left: auto;
+            text-align: right;
+            border-bottom-right-radius: 4px;
+        }
+        .msg.bot {
+            background: #222;
+            color: #ddd;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-input-row {
+            display: flex;
+            border-top: 1px solid var(--border);
+        }
+        .chat-input-row input {
+            flex: 1;
+            border: none;
+            margin: 0;
+            border-radius: 0 0 0 12px;
+        }
+        .chat-input-row .btn {
+            border-radius: 0 0 12px 0;
+        }
+        .ticket-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .ticket-item {
+            background: #1a1a1a;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--orange);
+        }
+        .ticket-item .status {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: var(--orange);
+            color: #000;
+            font-weight: 700;
+            float: right;
+        }
+        @media (max-width: 600px) {
+            .navbar { flex-direction: column; gap: 10px; }
+            .nav-links a { margin-left: 12px; font-size: 12px; }
+        }
     </style>
 </head>
 <body>
-    <h1>🔥 Ignited Cloud</h1>
-    <p>Free Minecraft Server Hosting — No Limits, No Fees.</p>
 
-    <div class="box">
-        <h3>Create Your Server</h3>
-        <input type="text" id="serverName" placeholder="Server Name">
-        <br>
-        <button class="btn" onclick="createServer()">Create Server</button>
-        <div id="result"></div>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="logo">🔥 Ignited Cloud</div>
+        <div class="nav-links" id="navLinks">
+            <a onclick="showPage('dashboard')">Dashboard</a>
+            <a onclick="showPage('plans')">Plans</a>
+            <a onclick="showPage('support')">Support</a>
+            <a onclick="showPage('login')" id="navLogin">Login</a>
+            <a onclick="logout()" id="navLogout" class="hidden">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- LOGIN PAGE -->
+        <div id="page-login" class="card hidden" style="max-width: 440px; margin: 60px auto;">
+            <h2>Login to Ignited Cloud</h2>
+            <input type="text" id="loginUser" placeholder="Username">
+            <input type="password" id="loginPass" placeholder="Password">
+            <button class="btn btn-block" onclick="login()">Login</button>
+            <p style="margin-top: 12px; font-size: 13px;">No account? <a style="color:var(--orange); cursor:pointer;" onclick="showPage('register')">Register here</a></p>
+        </div>
+
+        <!-- REGISTER PAGE -->
+        <div id="page-register" class="card hidden" style="max-width: 440px; margin: 60px auto;">
+            <h2>Create Account</h2>
+            <input type="text" id="regUser" placeholder="Username">
+            <input type="email" id="regEmail" placeholder="Email">
+            <input type="password" id="regPass" placeholder="Password">
+            <label style="font-size:13px; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="acceptTOS" style="width:auto;"> I accept the <span style="color:var(--orange); cursor:pointer;" onclick="alert('Terms: Free servers come with 1GB RAM & 5GB SSD. No illegal activity. Premium plans are non-refundable.')">Terms of Service</span>
+            </label>
+            <button class="btn btn-block" onclick="register()">Register</button>
+            <p style="margin-top: 12px; font-size: 13px;">Already have an account? <a style="color:var(--orange); cursor:pointer;" onclick="showPage('login')">Login</a></p>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="page-dashboard" class="hidden">
+            <div class="card">
+                <h2>⚡ Create a Minecraft Server</h2>
+                <input type="text" id="serverName" placeholder="Server Name (e.g. my-ignited-world)">
+                <button class="btn" onclick="createServer()">Create Server</button>
+                <div id="createResult" style="margin-top:16px;"></div>
+            </div>
+            <div class="card">
+                <h2>📋 Your Servers</h2>
+                <div id="serverList">Loading servers...</div>
+            </div>
+        </div>
+
+        <!-- PLANS PAGE -->
+        <div id="page-plans" class="hidden">
+            <h2 style="color:#fff; margin-bottom:18px;">💎 Choose Your Plan</h2>
+            <div class="flex-row">
+                <div class="plan-card" onclick="selectPlan('free')" id="planFree">
+                    <h3>🔥 Free</h3>
+                    <div class="price">$0/mo</div>
+                    <ul><li>1 GB RAM</li><li>5 GB SSD</li><li>1 Server</li><li>Community Support</li></ul>
+                    <button class="btn btn-outline btn-block">Select</button>
+                </div>
+                <div class="plan-card" onclick="selectPlan('premium')" id="planPremium">
+                    <h3>⚡ Premium</h3>
+                    <div class="price">$4.99/mo</div>
+                    <ul><li>4 GB RAM</li><li>20 GB SSD</li><li>3 Servers</li><li>Priority Support</li></ul>
+                    <button class="btn btn-block">Buy Premium</button>
+                </div>
+                <div class="plan-card" onclick="selectPlan('ultimate')" id="planUltimate">
+                    <h3>👑 Ultimate</h3>
+                    <div class="price">$9.99/mo</div>
+                    <ul><li>8 GB RAM</li><li>50 GB SSD</li><li>Unlimited Servers</li><li>Dedicated AI Assistant</li></ul>
+                    <button class="btn btn-block">Buy Ultimate</button>
+                </div>
+            </div>
+            <p id="planStatus" style="margin-top:18px; color:var(--orange);"></p>
+        </div>
+
+        <!-- SUPPORT PAGE -->
+        <div id="page-support" class="hidden">
+            <div class="flex-row">
+                <div class="card" style="flex:1;">
+                    <h2>🤖 AI Assistant</h2>
+                    <div class="chat-box">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="msg bot">Hey! I'm Ignited AI. Ask me anything about your server, plans, or setup!</div>
+                        </div>
+                        <div class="chat-input-row">
+                            <input type="text" id="chatInput" placeholder="Type your question...">
+                            <button class="btn" onclick="sendChat()">Send</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="flex:1;">
+                    <h2>🎫 Support Tickets</h2>
+                    <input type="text" id="ticketSubject" placeholder="Subject">
+                    <textarea id="ticketBody" placeholder="Describe your issue..." rows="3"></textarea>
+                    <button class="btn btn-block" onclick="createTicket()">Submit Ticket</button>
+                    <h3 style="margin-top:20px; color:#fff;">Your Tickets</h3>
+                    <div class="ticket-list" id="ticketList">No tickets yet.</div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        async function createServer() {
-            const name = document.getElementById("serverName").value;
-            const result = document.getElementById("result");
-            result.innerHTML = "⏳ Creating your server...";
+        // ---- SIMPLE STATE ----
+        let currentUser = null;
+        let currentPlan = 'free';
+        const API_URL = 'https://ignited-cloud.onrender.com';
 
-            // This calls YOUR backend (server.js)
-            // For GitHub Pages, you'd need a proxy service — more on this below
-            try {
-                const response = await fetch("YOUR_BACKEND_URL/create", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: name, user: 1 })
-                });
-                const data = await response.json();
-                result.innerHTML = `✅ Server Ready!<br>IP: ${data.ip}:${data.port}`;
-            } catch (err) {
-                result.innerHTML = "❌ Error creating server. Try again.";
+        // ---- NAVIGATION ----
+        function showPage(page) {
+            ['login','register','dashboard','plans','support'].forEach(p => {
+                document.getElementById('page-'+p).classList.add('hidden');
+            });
+            const el = document.getElementById('page-'+page);
+            if(el) el.classList.remove('hidden');
+            if(page === 'dashboard' && currentUser) loadServers();
+            if(page === 'support') loadTickets();
+        }
+
+        // ---- AUTH (localStorage) ----
+        function register() {
+            const user = document.getElementById('regUser').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value;
+            const tos = document.getElementById('acceptTOS').checked;
+            if(!user || !email || !pass) return alert('Fill all fields.');
+            if(!tos) return alert('You must accept the Terms of Service.');
+            const users = JSON.parse(localStorage.getItem('ic_users') || '{}');
+            if(users[user]) return alert('Username already exists.');
+            users[user] = { email, pass };
+            localStorage.setItem('ic_users', JSON.stringify(users));
+            alert('Account created! Please login.');
+            showPage('login');
+        }
+
+        function login() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value;
+            const users = JSON.parse(localStorage.getItem('ic_users') || '{}');
+            if(!users[user] || users[user].pass !== pass) return alert('Invalid credentials.');
+            currentUser = user;
+            localStorage.setItem('ic_currentUser', user);
+            updateUI();
+            showPage('dashboard');
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('ic_currentUser');
+            updateUI();
+            showPage('login');
+        }
+
+        function updateUI() {
+            document.getElementById('navLogin').classList.toggle('hidden', !!currentUser);
+            document.getElementById('navLogout').classList.toggle('hidden', !currentUser);
+            if(!currentUser) {
+                document.getElementById('page-dashboard').classList.add('hidden');
+                document.getElementById('page-plans').classList.add('hidden');
+                document.getElementById('page-support').classList.add('hidden');
             }
         }
+
+        // ---- SERVER CREATION (calls your Render API) ----
+        async function createServer() {
+            if(!currentUser) return alert('Please login first.');
+            const name = document.getElementById('serverName').value.trim();
+            if(!name) return alert('Enter a server name.');
+            const resDiv = document.getElementById('createResult');
+            resDiv.innerHTML = '⏳ Creating your server...';
+            try {
+                const res = await fetch(API_URL + '/create-server', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ serverName: name })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    resDiv.innerHTML = '✅ Server created! Refresh to see it below.';
+                    loadServers();
+                } else {
+                    resDiv.innerHTML = '❌ ' + (data.message || 'Error.');
+                }
+            } catch(e) {
+                resDiv.innerHTML = '❌ Cannot reach Ignited Cloud API.';
+            }
+        }
+
+        async function loadServers() {
+            const div = document.getElementById('serverList');
+            div.innerHTML = 'Loading servers...';
+            try {
+                const res = await fetch(API_URL + '/servers');
+                const data = await res.json();
+                if(data.success && data.servers.length) {
+                    div.innerHTML = data.servers.map(s => `<div class="ticket-item">🖥️ ${s.name} — ${s.ip}:${s.port} <span class="status">Online</span></div>`).join('');
+                } else {
+                    div.innerHTML = 'No servers yet. Create one above!';
+                }
+            } catch(e) {
+                div.innerHTML = 'Unable to load servers. API might be sleeping.';
+            }
+        }
+
+        // ---- PLANS ----
+        function selectPlan(plan) {
+            currentPlan = plan;
+            document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('plan'+plan.charAt(0).toUpperCase()+plan.slice(1)).classList.add('selected');
+            document.getElementById('planStatus').innerText = plan === 'free' ? '✅ You are on the Free plan.' : '🛒 Premium selection saved. Buy button will process payment (demo).';
+        }
+
+        // ---- AI ASSISTANT (simple keyword replies) ----
+        function sendChat() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if(!msg) return;
+            const messages = document.getElementById('chatMessages');
+            messages.innerHTML += `<div class="msg user">${msg}</div>`;
+            input.value = '';
+            let reply = "I'm not sure about that. Try asking about RAM, plans, or server setup!";
+            const lower = msg.toLowerCase();
+            if(lower.includes('ram') || lower.includes('memory')) reply = "Free plan has 1GB RAM. Upgrade to Premium (4GB) or Ultimate (8GB) for more!";
+            if(lower.includes('plan') || lower.includes('upgrade')) reply = "We have Free, Premium ($4.99), and Ultimate ($9.99) plans. Check the Plans page!";
+            if(lower.includes('server') && lower.includes('create')) reply = "Just head to Dashboard, type a name, and hit Create Server! It's that easy.";
+            if(lower.includes('port') || lower.includes('ip')) reply = "Your server IP appears on the Dashboard after creation. Make sure to copy the full address!";
+            if(lower.includes('premium') || lower.includes('buy')) reply = "Head to the Plans page and click 'Buy Premium'. Payment integration is coming soon!";
+            setTimeout(() => {
+                messages.innerHTML += `<div class="msg bot">${reply}</div>`;
+                messages.scrollTop = messages.scrollHeight;
+            }, 400);
+        }
+
+        // ---- TICKETS ----
+        function createTicket() {
+            if(!currentUser) return alert('Login first.');
+            const subject = document.getElementById('ticketSubject').value.trim();
+            const body = document.getElementById('ticketBody').value.trim();
+            if(!subject || !body) return alert('Fill subject and description.');
+            const tickets = JSON.parse(localStorage.getItem('ic_tickets') || '[]');
+            tickets.push({ user: currentUser, subject, body, status: 'Open', date: new Date().toLocaleString() });
+            localStorage.setItem('ic_tickets', JSON.stringify(tickets));
+            document.getElementById('ticketSubject').value = '';
+            document.getElementById('ticketBody').value = '';
+            loadTickets();
+            alert('Ticket submitted!');
+        }
+
+        function loadTickets() {
+            const tickets = JSON.parse(localStorage.getItem('ic_tickets') || '[]');
+            const div = document.getElementById('ticketList');
+            if(!tickets.length) { div.innerHTML = 'No tickets yet.'; return; }
+            div.innerHTML = tickets.map(t => `<div class="ticket-item"><span class="status">${t.status}</span><strong>${t.subject}</strong><br><small>${t.user} — ${t.date}</small><p style="font-size:12px;margin-top:4px;">${t.body}</p></div>`).join('');
+        }
+
+        // ---- INIT ----
+        function init() {
+            const saved = localStorage.getItem('ic_currentUser');
+            if(saved) {
+                currentUser = saved;
+                updateUI();
+                showPage('dashboard');
+            } else {
+                showPage('login');
+            }
+            selectPlan('free');
+        }
+        init();
     </script>
 </body>
 </html>
