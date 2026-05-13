@@ -4,7 +4,6 @@ const app = express();
 
 app.use(express.json());
 
-// 🔒 Your secret key stays hidden on Render — never in your GitHub repo
 const API_KEY = process.env.FREEGAMEHOST_API_KEY;
 const PANEL_URL = "https://panel.freegamehost.xyz";
 
@@ -69,12 +68,35 @@ app.post("/create-server", async (req, res) => {
   }
 });
 
-// 🩺 Health check — confirms your API is alive
+// 📋 List all servers
+app.get("/servers", async (req, res) => {
+  try {
+    const response = await fetch(`${PANEL_URL}/api/application/servers`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${API_KEY}`,
+        "Accept": "application/json"
+      }
+    });
+    const data = await response.json();
+    
+    const servers = data.data.map(s => ({
+      name: s.attributes.name,
+      id: s.attributes.id
+    }));
+    
+    res.json({ success: true, servers });
+  } catch (err) {
+    res.json({ success: false, servers: [] });
+  }
+});
+
+// 🩺 Health check
 app.get("/", (req, res) => {
   res.send("🔥 Ignited Cloud API is running!");
 });
 
-// 🚀 Start the server
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🔥 Ignited Cloud API running on port ${PORT}`);
