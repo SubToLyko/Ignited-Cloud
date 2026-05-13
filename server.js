@@ -1,6 +1,11 @@
 const express = require("express");
 const fetch = require("node-fetch");
+const cors = require("cors");
 const app = express();
+
+// Enable CORS so your GitHub Pages site can talk to this API
+app.use(cors());
+app.options("*", cors());
 
 app.use(express.json());
 
@@ -54,16 +59,20 @@ app.post("/create-server", async (req, res) => {
     const data = await response.json();
 
     if (data.errors) {
+      console.error("Pterodactyl error:", data.errors);
       return res.json({ success: false, message: data.errors[0].detail });
     }
 
+    console.log("Server created:", data.attributes?.name);
     res.json({
       success: true,
-      message: "Server created! Check your FreeGameHost panel.",
-      serverId: data.attributes.id
+      message: "Server created successfully!",
+      serverId: data.attributes.id,
+      serverName: data.attributes.name
     });
 
   } catch (err) {
+    console.error("Create server error:", err);
     res.json({ success: false, message: "Something went wrong. Try again!" });
   }
 });
@@ -79,14 +88,23 @@ app.get("/servers", async (req, res) => {
       }
     });
     const data = await response.json();
-    
+
+    if (data.errors) {
+      console.error("List servers error:", data.errors);
+      return res.json({ success: false, servers: [] });
+    }
+
     const servers = data.data.map(s => ({
       name: s.attributes.name,
-      id: s.attributes.id
+      id: s.attributes.id,
+      identifier: s.attributes.identifier
     }));
-    
+
+    console.log(`Found ${servers.length} servers`);
     res.json({ success: true, servers });
+
   } catch (err) {
+    console.error("List servers error:", err);
     res.json({ success: false, servers: [] });
   }
 });
@@ -96,7 +114,7 @@ app.get("/", (req, res) => {
   res.send("🔥 Ignited Cloud API is running!");
 });
 
-// Start server
+// 🚀 Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🔥 Ignited Cloud API running on port ${PORT}`);
